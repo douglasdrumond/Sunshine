@@ -31,9 +31,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by douglasdrumond on 7/20/14.
- */
 public class ForecastFragment extends Fragment {
 
     private ArrayAdapter<String> mForecastAdapter;
