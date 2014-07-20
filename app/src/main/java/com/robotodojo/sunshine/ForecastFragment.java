@@ -2,6 +2,7 @@ package com.robotodojo.sunshine;
 
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -128,8 +129,6 @@ public class ForecastFragment extends Fragment {
                         .appendQueryParameter("units", "metric")
                         .appendQueryParameter("cnt", String.valueOf(numDays));
 
-                Log.v(LOG_TAG, "URL: " + builder.build().toString());
-
                 URL url = new URL(builder.build().toString());
 
                 // Create the request to OpenWeatherMap, and open the connection
@@ -160,8 +159,6 @@ public class ForecastFragment extends Fragment {
                 }
                 forecastJsonStr = buffer.toString();
 
-                Log.v(LOG_TAG, "Forecast JSON String: " + forecastJsonStr);
-
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attemping
@@ -183,17 +180,28 @@ public class ForecastFragment extends Fragment {
             String[] weatherData;
             try {
                 weatherData = getWeatherDataFromJson(forecastJsonStr, numDays);
-                Log.v(LOG_TAG, Arrays.toString(weatherData));
             } catch (JSONException e) {
                 weatherData = null;
             }
             return weatherData;
         }
 
+        @Override
+        protected void onPostExecute(String[] strings) {
+            mForecastAdapter.clear();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                mForecastAdapter.addAll(strings);
+            } else {
+                for (String weather : strings) {
+                    mForecastAdapter.add(weather);
+                }
+            }
+            mForecastAdapter.notifyDataSetChanged();
+        }
 
         /* The date/time conversion code is going to be moved outside the asynctask later,
-         * so for convenience we're breaking it out into its own method now.
-         */
+                 * so for convenience we're breaking it out into its own method now.
+                 */
         private String getReadableDateString(long time) {
             // Because the API returns a unix timestamp (measured in seconds),
             // it must be converted to milliseconds in order to be converted to valid date.
