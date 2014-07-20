@@ -193,7 +193,6 @@ public class ForecastFragment extends Fragment {
                     mForecastAdapter.add(weather);
                 }
             }
-            mForecastAdapter.notifyDataSetChanged();
         }
 
         /* The date/time conversion code is going to be moved outside the asynctask later,
