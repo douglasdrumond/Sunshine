@@ -34,6 +34,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.robotodojo.sunshine.MainActivity" />
         </activity>
+
+        <provider
+            android:authorities="com.robotodojo.sunshine"
+            android:name=".data.WeatherProvider" />
     </application>
 
 </manifest>
