@@ -8,6 +8,7 @@
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
     android:weightSum="2"
+    android:background="@drawable/touch_selector"
     android:padding="16dp">
 
 

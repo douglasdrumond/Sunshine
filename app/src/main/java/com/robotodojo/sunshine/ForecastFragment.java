@@ -1,5 +1,6 @@
 package com.robotodojo.sunshine;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -28,6 +29,19 @@ import static com.robotodojo.sunshine.data.WeatherContract.LocationEntry;
 import static com.robotodojo.sunshine.data.WeatherContract.WeatherEntry;
 
 public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor> {
+
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * Callback for when an item has been selected.
+         */
+        public void onItemSelected(String date);
+    }
+
     // For the forecast view we're showing only a small subset of the stored data.
     // Specify the columns we need.
     private static final String[] FORECAST_COLUMNS = {
@@ -55,9 +69,17 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     public static final int COL_LOCATION_SETTING = 5;
 
     private static final int FORECAST_LOADER = 0;
+
+    private static final String SELECTED_POSITION = "SELECTED_POSITION";
+
+    private Callback mCallbackActivity;
+    private int mSelectedPosition = ListView.INVALID_POSITION;
+
     private String mLocation;
 
     private ForecastAdapter mForecastAdapter;
+    private ListView mListView;
+    private boolean mUseTodayLayout;
 
 
     @Override
@@ -90,10 +112,31 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
         return super.onOptionsItemSelected(item);
     }
 
+    public void setUseTodayLayout(boolean useTodayLayout) {
+        mUseTodayLayout = useTodayLayout;
+        if (mForecastAdapter != null) {
+            mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
+        }
+    }
+
     private void updateWeather() {
         String location = Utility.getPreferredLocation(getActivity());
         FetchWeatherTask weatherTask = new FetchWeatherTask(getActivity());
         weatherTask.execute(location);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof Callback) {
+            mCallbackActivity = (Callback) activity;
+        } else {
+            throw new IllegalArgumentException("Activity hosting "
+                    + ForecastFragment.class.getSimpleName()
+                    + " needs to implement "
+                    + Callback.class.getName());
+        }
     }
 
     @Override
@@ -105,22 +148,33 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
         // The SimpleCursorAdapter will take data from the database through the
         // Loader and use it to populate the ListView it's attached to.
         mForecastAdapter = new ForecastAdapter(getActivity(), null, 0);
-
-        ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
-        listView.setAdapter(mForecastAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
+        mListView = (ListView) rootView.findViewById(R.id.listview_forecast);
+        mListView.setAdapter(mForecastAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Cursor cursor = mForecastAdapter.getCursor();
                 if (cursor != null && cursor.moveToPosition(position)) {
-                    Intent intent = new Intent(getActivity(), DetailActivity.class)
-                            .putExtra(DetailActivity.DATE_KEY, cursor.getString(COL_WEATHER_DATE));
-                    startActivity(intent);
+                    mCallbackActivity.onItemSelected(cursor.getString(COL_WEATHER_DATE));
+                    mSelectedPosition = position;
                 }
             }
         });
 
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_POSITION)) {
+            mSelectedPosition = savedInstanceState.getInt(SELECTED_POSITION);
+        }
+
         return rootView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if (mSelectedPosition != ListView.INVALID_POSITION) {
+            outState.putInt(SELECTED_POSITION, mSelectedPosition);
+        }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -161,6 +215,9 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         mForecastAdapter.swapCursor(cursor);
+        if (mSelectedPosition != ListView.INVALID_POSITION) {
+            mListView.setSelection(mSelectedPosition);
+        }
     }
 
     @Override

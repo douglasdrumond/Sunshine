@@ -47,6 +47,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
 
+    private static final String DATE_KEY = "forecast_date";
     private static final String LOCATION_KEY = "location";
 
     private ShareActionProvider mShareActionProvider;
@@ -85,6 +86,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         setHasOptionsMenu(true);
     }
 
+    public static DetailFragment newInstance(String date) {
+        DetailFragment f = new DetailFragment();
+
+        Bundle args = new Bundle();
+        args.putString(DATE_KEY, date);
+        f.setArguments(args);
+
+        return f;
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putString(LOCATION_KEY, mLocation);
@@ -110,8 +121,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onResume() {
         super.onResume();
-        if (mLocation != null &&
-                !mLocation.equals(Utility.getPreferredLocation(getActivity()))) {
+        Bundle arguments = getArguments();
+        if (arguments != null
+                && arguments.containsKey(DATE_KEY)
+                && mLocation != null
+                && !mLocation.equals(Utility.getPreferredLocation(getActivity()))) {
             getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
         }
     }
@@ -144,21 +158,23 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
+
         if (savedInstanceState != null) {
             mLocation = savedInstanceState.getString(LOCATION_KEY);
         }
-        super.onActivityCreated(savedInstanceState);
+        Bundle arguments = getArguments();
+        if (arguments != null
+                && arguments.containsKey(DATE_KEY)) {
+            getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+        }
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.v(LOG_TAG, "In onCreateLoader");
-        Intent intent = getActivity().getIntent();
-        if (intent == null || !intent.hasExtra(DetailActivity.DATE_KEY)) {
-            return null;
-        }
-        String forecastDate = intent.getStringExtra(DetailActivity.DATE_KEY);
+
+        String forecastDate = getArguments().getString(DATE_KEY);
 
         // Sort order:  Ascending, by date.
         String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATETEXT + " ASC";
@@ -239,5 +255,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) { }
+    public void onLoaderReset(Loader<Cursor> loader) {
+    }
 }
