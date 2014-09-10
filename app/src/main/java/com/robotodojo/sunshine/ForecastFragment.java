@@ -21,6 +21,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.robotodojo.sunshine.data.WeatherContract;
+import com.robotodojo.sunshine.service.SunshineService;
 
 import java.util.Date;
 
@@ -121,8 +122,7 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
 
     private void updateWeather() {
         String location = Utility.getPreferredLocation(getActivity());
-        FetchWeatherTask weatherTask = new FetchWeatherTask(getActivity());
-        weatherTask.execute(location);
+        SunshineService.startActionUpdateWeather(getActivity(), location);
     }
 
     @Override
