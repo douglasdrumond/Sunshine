@@ -1,6 +1,9 @@
 package com.robotodojo.sunshine;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -22,6 +25,7 @@ import android.widget.TextView;
 
 import com.robotodojo.sunshine.data.WeatherContract;
 import com.robotodojo.sunshine.service.SunshineService;
+import com.robotodojo.sunshine.sync.SunshineSyncAdapter;
 
 import java.util.Date;
 
@@ -121,8 +125,7 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     }
 
     private void updateWeather() {
-        String location = Utility.getPreferredLocation(getActivity());
-        SunshineService.startActionUpdateWeather(getActivity(), location);
+        SunshineSyncAdapter.syncImmediately(getActivity());
     }
 
     @Override

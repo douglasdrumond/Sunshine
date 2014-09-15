@@ -22,6 +22,11 @@
     <string name="dash_separator">" – "</string>
     <string name="slash_separator">/</string>
 
+    <!-- Account type (for sync-adapter authenticator) -->
+    <!-- SyncAdapter related -->
+    <string name="sync_account_type">sunshine.robotodojo.com</string>
+    <string name="content_authority">com.robotodojo.sunshine</string>
+
     <!-- Date label when displaying today's weather forecast [CHAR LIMIT=20] -->
     <string name="today">Today</string>
 
