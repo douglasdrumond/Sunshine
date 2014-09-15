@@ -11,7 +11,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 
 import com.robotodojo.sunshine.data.WeatherContract;
-import com.robotodojo.sunshine.service.SunshineService;
+import com.robotodojo.sunshine.sync.SunshineSyncAdapter;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings.
@@ -76,8 +76,7 @@ public class SettingsActivity extends PreferenceActivity
 
         if (!mBindingPreference) {
             if (preference.getKey().equals(getString(R.string.pref_location_key))) {
-                String location = value.toString();
-                SunshineService.startActionUpdateWeather(this, location);
+                SunshineSyncAdapter.syncImmediately(this);
             } else {
                 getContentResolver().notifyChange(WeatherContract.WeatherEntry.CONTENT_URI, null);
             }

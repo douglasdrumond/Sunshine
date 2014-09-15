@@ -14,7 +14,7 @@ import java.util.Date;
 
 public class Utility {
     // Format used for storing dates in the database.  ALso used for converting those strings
-// back into date objects for comparison/processing.
+    // back into date objects for comparison/processing.
     public static final String DATE_FORMAT = "yyyyMMdd";
 
     /**
@@ -69,7 +69,7 @@ public class Utility {
      * @param context Context to use for resource localization
      * @param dateStr The db formatted date string, expected to be of the form specified
      *                in Utility.DATE_FORMAT
-     * @return
+     * @return String with day name
      */
     public static String getDayName(Context context, String dateStr) {
         SimpleDateFormat dbDateFormat = new SimpleDateFormat(Utility.DATE_FORMAT);
@@ -140,7 +140,7 @@ public class Utility {
                 context.getString(R.string.pref_location_default));
     }
 
-    static String formatTemperature(Context context, double temperature, boolean isMetric) {
+    public static String formatTemperature(Context context, double temperature, boolean isMetric) {
         double temp;
         if ( !isMetric ) {
             temp = 9*temperature/5+32;
@@ -150,7 +150,7 @@ public class Utility {
         return context.getString(R.string.format_temperature, temp);
     }
 
-    static String formatDate(String dateString) {
+    public static String formatDate(String dateString) {
         Date date = WeatherContract.getDateFromDb(dateString);
         return DateFormat.getDateInstance().format(date);
     }
